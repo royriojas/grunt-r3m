@@ -1,28 +1,34 @@
-[![build status](https://secure.travis-ci.org/jharding/grunt-less.png)](http://travis-ci.org/jharding/grunt-less)
-grunt-less (deprecated)
+
+grunt-r3m
 ==========
 
-This grunt plugin has been [deprecated](https://github.com/jharding/grunt-less/issues/15). If you're looking for a less grunt plugin, check out [grunt-contrib-less](https://github.com/gruntjs/grunt-contrib-less).
+This is a very tiny set of tasks for grunt. It contains:
+
+- grunt-less. Same as the original grunt-less, but it handles the copy and override of the resources to the folder of the output file
+- clean-css. A wrapper of clean-css to be used in grunt
+- html-copy. A task to process and replace special tokens in the html files and to remove html comments. It kinda minimize html files
 
 Getting Started
 ---------------
 
-Install this grunt plugin next to your project's [grunt.js gruntfile][getting_started] with: `npm install grunt-less`
+Install this grunt plugin next to your project's [grunt.js gruntfile][getting_started] with: `npm install grunt-r3m`
 
 Then add this line to your project's `grunt.js` gruntfile:
 
 ```javascript
-grunt.loadNpmTasks('grunt-less');
+grunt.loadNpmTasks('grunt-r3m');
 ```
 
-[npm_registry_page]: http://search.npmjs.org/#/grunt-less
+[npm_registry_page]: http://search.npmjs.org/#/grunt-r3m
 [grunt]: https://github.com/cowboy/grunt
 [getting_started]: https://github.com/cowboy/grunt/blob/master/docs/getting_started.md
 
 Documentation
 -------------
 
-This task is a [multi task][types_of_tasks], meaning that grunt will automatically iterate over all `less` targets if a target is not specified.
+These tasks are [multi task][types_of_tasks], meaning that grunt will automatically iterate over all `less`, `cleanCSS` and `HTMLCopy` targets if a target is not specified.
+
+less task
 
 ### Target Properties
 *   __src__*(required)*: The LESS file(s) to be compiled. Can be either a string or an array of strings. If more than one LESS file is provided, each LESS file will be compiled individually and then concatenated together.
@@ -57,6 +63,100 @@ grunt.initConfig({
 });
 ```
 
+cleanCss task
+
+### Target Properties
+*   __src__*(required)*: The css file(s) to be minimized. Can be either a string or an array of strings. If more than one css file is provided they are going to be concatenated together.
+*   __dest__*(required)*: The path where the output from the css minification should be placed. Must be a string as there can be only one destination.
+
+### Example
+
+```javascript
+// project configuration
+grunt.initConfig({
+  cleanCss : {
+    app : {
+      src : ['<config:less.app.dest>'],
+      dest : CSS_DEPLOY_PATH+'<%= pkg.name %>.app.min.css'
+    },
+    cabin : {
+      src : ['<config:less.cabin.dest>'],
+      dest : CSS_DEPLOY_PATH + '/cabin.css'
+    }
+  }
+});
+```
+
+HTMLCopy task
+
+### Target Properties
+*   __src__*(required)*: The file to be processed.
+*   __dest__*(required)*: The path where the output should be placed. 
+*   __options__*(required)*: some configuration options to use like removeHTMLComments, enable include statements, and replacements to be processed. Take a look at the example below 
+
+### Example
+
+```javascript
+// project configuration
+grunt.initConfig({
+  HTMLCopy : {
+    prod : {
+      src : [BASE_SOURCE_DIR  + 'index.html'],
+      dest : BASE_DEPLOY_PATH + 'index.html',
+      options : {
+        removeHTMLComments : true, // remove the html comments
+        includes : {
+          enabled : ['CHROME_FRAME', 'GOOGLE_ANALITICS'] // the ids of the include statements that are going to be processed. Only the ids of the statements included here will be processed. This will likely change to add in the statement itself the name of the tasks where the directive should be processed
+        },
+        replacements : { //tokens to be replaced in the template file
+          'REQUIRE_OOBE' : 'require-oobe',
+          "LIB_CSS" : LIB_CSS_MIN,
+          "MODERNIZR" : MODERNIZR_MIN,
+          "LIB_JQUERY" : LIB_JQUERY_MIN,
+          "LIB_JQUERY_UI" : LIB_JQUERY_UI_MIN,
+          "LIB_JQUERY_EXT" : LIB_JQUERY_EXT_MIN,
+          "LIB_JQUERY_UI_EXT" : LIB_JQUERY_UI_EXT_MIN,
+          "LAB" : LAB_MIN,
+          "LIB_JS" : LIB_JS_MIN,
+          "LIB_APP_JS" : LIB_APP_JS_MIN,
+          "APP_JS" : APP_JS_MIN,
+          "APP_CSS" : APP_CSS_MIN,
+          "LOADER_FILE" : LOADER_FILE_MIN,
+          "I18N_PATTERN" : I18N_PATTERN
+        }
+      }
+    },
+    dev : {
+      src : [BASE_SOURCE_DIR  + 'index.html'],
+      dest : BASE_DEPLOY_PATH + 'index.html',
+      options : {
+        includes : {
+          enabled : ['CHROME_FRAME']
+        },
+        replacements : {
+          'REQUIRE_OOBE' : 'require-oobe',
+          "LIB_CSS" : LIB_CSS,
+          "MODERNIZR" : MODERNIZR,
+          "LIB_JQUERY" : LIB_JQUERY,
+          "LIB_JQUERY_UI" : LIB_JQUERY_UI,
+          "LIB_JQUERY_EXT" : LIB_JQUERY_EXT,
+          "LIB_JQUERY_UI_EXT" : LIB_JQUERY_UI_EXT,
+          "LAB" : LAB,
+          "LIB_JS" : LIB_JS,
+          "LIB_APP_JS" : LIB_APP_JS,
+          "APP_JS" : APP_JS,
+          "APP_CSS" : APP_CSS,
+          "LOADER_FILE" : LOADER_FILE,
+          "I18N_PATTERN" : I18N_PATTERN
+        }
+      }
+    }
+  }
+});
+```
+
+
+
 [types_of_tasks]: https://github.com/cowboy/grunt/blob/master/docs/types_of_tasks.md
 
 Contributing
@@ -66,16 +166,12 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 Release History
 ---------------
-*   __08/28/2012 - 0.1.6__: Remove grunt as a dependency.
-*   __06/14/2012 - 0.1.5__: Added test cases. 
-*   __04/08/2012 - 0.1.4__: Refactored the code to make the helper function more usable. 
-*   __04/08/2012 - 0.1.3__: Added `gruntplugin` keyword to be [consistent with other plugins](https://github.com/cowboy/grunt/issues/111).
-*   __04/05/2012 - 0.1.2__: Added support for wildcard patterns and normalizing linefeeds for concatenation. 
-*   __04/04/2012 - 0.1.1__: Checking to see if the `src` and `dest` properties are defined. Also now accept a string for `src` and not just an array of strings.
+*   __04/04/2012 - 0.1.1__: Added a draft of the readme.md.
 *   __04/04/2012 - 0.1.0__: Initial release.
 
 License
 -------
 
-Copyright (c) 2012 Jake Harding  
+Copyright (c) 2012 Roy Riojas  
+This is based on the original grunt-less task
 Licensed under the MIT license.

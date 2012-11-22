@@ -1,6 +1,7 @@
 /*
  * grunt-less
- * https://github.com/jachardi/grunt-less
+ * original repo https://github.com/jachardi/grunt-less
+ * modified by royriojas@gmail.com to support copy of resources 
  *
  * Copyright (c) 2012 Jake Harding
  * Licensed under the MIT license.

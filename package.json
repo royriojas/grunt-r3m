@@ -2,7 +2,7 @@
   "name": "grunt-r3m",
   "description": "A tiny set of utilities for grunt",
   "version": "0.1.0",
-  "private" : true,
+  
   "homepage": "https://github.com/royriojas/grunt-r3m",
   "author": "royriojas@gmail.com",
   "repository": {
