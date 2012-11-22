@@ -166,7 +166,7 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 Release History
 ---------------
-*   __04/04/2012 - 0.1.1__: Added a draft of the readme.md.
+*   __04/04/2012 - 0.1.1__: Added some documentation.
 *   __04/04/2012 - 0.1.0__: Initial release.
 
 License
