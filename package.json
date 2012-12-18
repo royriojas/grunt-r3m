@@ -27,7 +27,8 @@
   },
   "dependencies": {
     "less" : "*",
-    "clean-css" : "*"
+    "clean-css" : "*",
+    "request": "*"
   },
   "devDependencies": {
     "grunt": "~0.3.7"
