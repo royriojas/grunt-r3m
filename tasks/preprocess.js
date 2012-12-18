@@ -92,7 +92,7 @@ module.exports = function(grunt) {
         }
       }
       catch (ex) {
-        verbose.warning('Error trying to read file ' + pathOfFile + ', message : ' + ex.message);
+        verbose.writeln('Error trying to read file ' + pathOfFile + ', message : ' + ex.message);
       }
 
       return trim(content);
