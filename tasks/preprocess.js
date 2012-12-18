@@ -138,20 +138,27 @@ module.exports = function(grunt) {
           readRemoteFile(filename, cb);
         });
       } else {
-        var files = grunt.file.expandFiles(filename);
-        if (files.length === 0) {
-          grunt.verbose.error();
-          throw grunt.task.taskError('Unable to read "' + filename);
-        }
-        fnList.push(function(cb) {
-          var data = grunt.helper('preprocess', files, { separator: self.data.separator });
-          if (data === '') {
-            cb({e:"invalid file path : " + filename, filepath:filename});
-          } else {
 
-            cb(null, data);
-          }
-        });
+        var fName = path.normalize(filename);
+        grunt.verbose.writeln('======== Exploding =========');
+        grunt.verbose.writeln('fName : '+ fName);
+        var files = grunt.file.expandFiles(fName);
+        //if (files.length === 0) {
+        //grunt.verbose.error();
+        //throw grunt.task.taskError('Unable to read "' + fName);
+        //}
+        if (files.length > 0) {
+          fnList.push(function(cb) {
+            var data = grunt.helper('preprocess', files, { separator: self.data.separator });
+            if (data === '') {
+              cb({e:"invalid file path : " + filename, filepath:filename});
+            } else {
+
+              cb(null, data);
+            }
+          });
+        }
+
       }
     });
 
