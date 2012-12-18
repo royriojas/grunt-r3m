@@ -92,7 +92,9 @@ module.exports = function(grunt) {
         }
       }
       catch (ex) {
-        verbose.writeln('Error trying to read file ' + pathOfFile + ', message : ' + ex.message);
+        //verbose.writeln('Error trying to read file ' + pathOfFile + ', message : ' + ex.message);
+        grunt.verbose.error();
+        throw grunt.task.taskError('Unable to read "' + pathOfFile);
       }
 
       return trim(content);
