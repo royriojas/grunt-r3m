@@ -12,7 +12,8 @@ var request = require("request"),
 var path = require('path');
 var lib = require('../lib/lib');
 var trim = lib.trim;
-var extend = lib.extend;
+var extend = lib.extend,
+  isNull = lib.isNull;
 
 
 module.exports = function(grunt) {
@@ -109,6 +110,22 @@ module.exports = function(grunt) {
     return src;
   }
 
+  function executeReplacements(src, replacements) {
+
+    for (var i = 0, len = replacements.length; i < len; i++) {
+      var current = replacements[i],
+        regex = current.replace,
+        replacement = current.using;
+
+      if (isNull(regex)) {
+        continue;
+      }
+      console.log('replacing:-----',regex,replacement);
+      src = src.replace(regex,replacement);
+    }
+    return src;
+  }
+
   // Concat source files and/or directives.
   grunt.registerHelper('preprocess', function(files, options) {
     options = grunt.utils._.defaults(options || {}, {
@@ -123,6 +140,7 @@ module.exports = function(grunt) {
           dirOfFile = path.dirname(fname);
 
         data = findTokens(data, dirOfFile);
+        data = executeReplacements(data, options.replacements || []);
 
         return data;
       });
@@ -132,8 +150,10 @@ module.exports = function(grunt) {
 
   grunt.registerMultiTask('preprocess', 'Concatenate files with remote supports and token parsing.', function() {
     var done = this.async();
+    var self = this;
 
     var fnList = [];
+
     this.file.src.forEach(function (filename, index) {
       if (isRemoteFile(filename)) {
         fnList.push(function(cb){
@@ -151,7 +171,7 @@ module.exports = function(grunt) {
         //}
         if (files.length > 0) {
           fnList.push(function(cb) {
-            var data = grunt.helper('preprocess', files, { separator: self.data.separator });
+            var data = grunt.helper('preprocess', files, self.data);
             if (data === '') {
               cb({e:"invalid file path : " + filename, filepath:filename});
             } else {
@@ -166,7 +186,7 @@ module.exports = function(grunt) {
 
 
 
-    var self = this;
+
     grunt.utils.async.parallel(fnList, function (err, results) {
       if (err) {
         grunt.verbose.error();
