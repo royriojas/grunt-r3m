@@ -14,73 +14,22 @@ module.exports = function(grunt) {
   'use strict';
 
   // Grunt utilities.
-  var task = grunt.task;
-  var file = grunt.file;
-  var utils = grunt.utils;
-  var log = grunt.log;
-  var verbose = grunt.verbose;
-  var fail = grunt.fail;
-  var option = grunt.option;
-  var config = grunt.config;
-  var template = grunt.template;
 
-  // external dependencies
-  var fs = require('fs');
-  var path = require('path');
-  var less = require('less');
-  var lib = require('../lib/lib');
-  var url = require('url');
-  var format = lib.format;
-  var trim = lib.trim;
-  var md5 = lib.md5;
-  var addNoCache = lib.addNoCache;
-
-  // ==========================================================================
-  // TASKS
-  // ==========================================================================
-
-  grunt.registerMultiTask('less', 'Compile LESS files.', function() {
-    var src = this.file.src;
-    var dest = this.file.dest;
-    var options = this.data.options || {};
-
-
-    if (!src) {
-      grunt.warn('Missing src property.');
-      return false;
-    }
-
-    if (!dest) {
-      grunt.warn('Missing dest property');
-      return false;
-    }
-
-    var srcFiles = file.expandFiles(src);
-
-    verbose.writeln('\n\n====================');
-    verbose.writeln('Less src files = ' + srcFiles.join(', '));
-    verbose.writeln('====================\n\n');
-
-    var destDir = path.dirname(dest);
-
-    var done = this.async();
-
-    grunt.helper('less', srcFiles, destDir, options, function(err, css) {
-      if (err) {
-        grunt.warn(err);
-        done(false);
-
-        return;
-      }
-
-      file.write(dest, css);
-      done();
-    });
-  });
-
-  // ==========================================================================
-  // HELPERS
-  // ==========================================================================
+  var file = grunt.file,
+    utils = grunt.util,
+    verbose = grunt.verbose,
+    log = require('../lib/log')(grunt),
+    logVerbose = log.logVerbose,
+    // external dependencies
+    fs = require('fs'),
+    path = require('path'),
+    less = require('less'),
+    lib = require('../lib/lib'),
+    url = require('url'),
+    format = lib.format,
+    trim = lib.trim,
+    md5 = lib.md5,
+    addNoCache = lib.addNoCache;
 
 
   var URL_MATCHER = /url\(\s*[\'"]?\/?(.+?)[\'"]?\s*\)/gi,  //regex used to match the urls inside the less or css files
@@ -97,8 +46,6 @@ module.exports = function(grunt) {
   function isLessFile (path) {
     return IS_LESS_MATCHER.test(path);
   }
-
-
 
   function copyFileToNewLocation (src, destDir, relativePathToFile) {
     var dirOfFile = path.dirname(src);
@@ -117,7 +64,7 @@ module.exports = function(grunt) {
     var relativeOutputFn = format('assets/{1}_{0}', fName, md5OfResource);
     var newPath = path.normalize(path.join(destDir, relativeOutputFn));
 
-    grunt.file.copy(absolutePathToResource, newPath);
+    file.copy(absolutePathToResource, newPath);
     verbose.writeln(format('===> copied file from {0} to {1}', absolutePathToResource, newPath));
     var outName = relativeOutputFn + lastPart;
     verbose.writeln(format('===> url replaced from {0} to {1}', relativePathToFile, outName));
@@ -127,7 +74,7 @@ module.exports = function(grunt) {
   function checkIfNeedRewrite (b) {
     //if start with / it means it is relative to the main domain
     //if start with data:
-    //TODO: this is the second time a call for a regularExpression.test fails when called too fast
+    //TODO: this is the second time a call for a regularExpression.test fails when called too fast. Investigate why!!!
     //return !DATA_URI_MATCHER.test(b) && !RELATIVE_TO_HOST_MATCHER.test(b) && !PROTOCOL_MATCHER.test(b);
 
     //if already an absolute path, do nothing
@@ -137,6 +84,7 @@ module.exports = function(grunt) {
   //to avoid duplicated file names
   var folderIdx = 0,
     idx = 0;
+
   function rewriteURLS (ctn, src, destDir) {
 
     if (!lib.isNull(ctn)) {
@@ -165,7 +113,7 @@ module.exports = function(grunt) {
   }
 
 
-  grunt.registerHelper('less', function(srcFiles, destDir, options, callback) {
+  var lessProcess = function(srcFiles, destDir, options, callback) {
     var compileLESSFile = function (src, callback) {
       var parser = new less.Parser({
         paths: [path.dirname(src)]
@@ -216,5 +164,66 @@ module.exports = function(grunt) {
 
       callback(null, results.join(utils.linefeed));
     });
+  };
+
+
+  // ==========================================================================
+  // TASKS
+  // ==========================================================================
+
+  grunt.registerMultiTask('cLess', 'Concatenate less or css resources.', function() {
+
+    var me = this,
+      optFile = me.data,
+      src = optFile.src,
+      dest = optFile.dest,
+      options = me.data.options || {};
+
+
+
+
+    if (!src) {
+      grunt.warn('Missing src property.');
+      return false;
+    }
+
+    if (!dest) {
+      grunt.warn('Missing dest property');
+      return false;
+    }
+
+    var srcFiles = file.expand(src);
+
+    logVerbose('Less src files = ' + srcFiles.join(', '));
+
+    var destDir = path.dirname(dest);
+
+    logVerbose('Less dest = ' + dest);
+
+
+    var done = me.async();
+
+
+
+
+    lessProcess(srcFiles, destDir, options, function(err, css) {
+      if (err) {
+        grunt.warn(err);
+        done(false);
+
+        return;
+      }
+
+      file.write(dest, css);
+      done();
+    });
+    return true;
   });
+
+  // ==========================================================================
+  // HELPERS
+  // ==========================================================================
+
+
+
 };
