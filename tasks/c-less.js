@@ -1,7 +1,10 @@
 /*
- * grunt-less
+ * grunt-r3m c-less
+ *
+ * Based on the now deprecated grunt-less
  * original repo https://github.com/jachardi/grunt-less
- * modified by royriojas@gmail.com to support copy of resources 
+ *
+ * modified by royriojas@gmail.com to support copy of resources and concatenating of
  *
  * Copyright (c) 2012 Jake Harding
  * Licensed under the MIT license.
@@ -167,15 +170,6 @@ module.exports = function(grunt) {
       var parser = new less.Parser({
         paths: [path.dirname(src)]
       });
-
-      // read source file
-      /*fs.readFile(src, 'utf8', function(err, data) {
-        if (err) {
-          callback(err);
-        }
-
-
-      });*/
 
       var data = file.read(src);
 
