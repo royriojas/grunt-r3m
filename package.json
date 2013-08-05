@@ -1,7 +1,7 @@
 {
   "name": "grunt-r3m",
   "description": "A tiny set of utilities for grunt",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage": "https://github.com/royriojas/grunt-r3m",
   "author": "royriojas@gmail.com",
   "repository": {
@@ -27,8 +27,8 @@
     "request": "*"
   },
   "devDependencies": {
-    "grunt": "~0.4.0rc8",
-    "grunt-contrib-jshint": "~0.1.1rc6"
+    "grunt": "~0.4.0",
+    "grunt-contrib-jshint": "~0.1.1"
   },
   "keywords": [
     "less",

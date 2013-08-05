@@ -15,6 +15,7 @@ module.exports = function(grunt) {
     request = require("request"),
     file = grunt.file,
     path = require('path'),
+    lib = require('../lib/lib.js'),
     preprocess = require('../lib/preprocess')(grunt);
 
 
@@ -37,8 +38,12 @@ module.exports = function(grunt) {
       fnList = [],
       data = self.data || {},
       src = data.src || [],
-      dest = self.data.dest;
+      dest = self.data.dest,
+      options = self.options({
+        tokenRegex : /\[\s*(\w*)\s*([\w="'-.\/\s]*)\s*\]/gi
+      });
 
+    //console.log(options);
 
     src.forEach(function (filename) {
       if (isRemoteFile(filename)) {
@@ -56,13 +61,21 @@ module.exports = function(grunt) {
 
         if (files.length > 0) {
           fnList.push(function(cb) {
-            var data = preprocess(files, self.data);
-            if (data === '') {
-              cb({e:"invalid file path : " + filename, filepath:filename});
-            } else {
-
-              cb(null, data);
+            var data = preprocess(files, self.data, options);
+            
+            if (lib.isNull(data)) {
+              cb({ 
+                message:"invalid file path : " + filename, 
+                filepath:filename
+              });
+              return;
             }
+
+            if (data === '') {
+              grunt.log.warn('[WARNING] possible empty file : ' + filename);
+            }
+            cb(null, data);
+            
           });
         }
 
@@ -74,9 +87,8 @@ module.exports = function(grunt) {
 
     grunt.util.async.parallel(fnList, function (err, results) {
       if (err) {
-        grunt.verbose.error();
-        throw grunt.task.taskError('Unable to read "' + err.filepath +
-          '" file (Error code: ' + err.e.code + ').', err.e);
+        console.log(err);
+        grunt.log.error('Unable to read "' + err.filepath + '", error details : ' + err.message);
       }
 
       var src = results.join(self.data.separator || "");

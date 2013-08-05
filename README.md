@@ -79,6 +79,17 @@ preprocess task
 // project configuration
 grunt.initConfig({
   preprocess: {
+    options : {
+      // this regular expression is used to parse the INCLUDE commands
+      // which are used to include the contents of other files inside the 
+      // preprocessed files
+      // something like this 
+      // 
+      // var tpl = '[INCLUDE src="../templates/templates.doT"]';
+      // 
+      // if not specified the tokenRegex is as the one shown below
+      tokenRegex : /\[\s*(\w*)\s*([\w="'-.\/\s]*)\s*\]/gi
+    },
     app: {
       src: ['path/to/some/file.js', 'path/to/more/files/**/*.js'],
       dest: 'path/to/some/deploy/file.js',
