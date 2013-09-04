@@ -38,7 +38,7 @@ module.exports = function(grunt) {
       fnList = [],
       data = self.data || {},
       src = data.src || [],
-      dest = self.data.dest,
+      dest = data.dest,
       options = self.options({
         tokenRegex : /\[\s*(\w*)\s*([\w="'-.\/\s]*)\s*\]/gi
       });

@@ -47,7 +47,7 @@ module.exports = function(grunt) {
     return IS_LESS_MATCHER.test(path);
   }
 
-  function copyFileToNewLocation (src, destDir, relativePathToFile) {
+  function copyFileToNewLocation (src, destDir, relativePathToFile, version) {
     var dirOfFile = path.dirname(src);
 
     var urlObj = url.parse(relativePathToFile);
@@ -59,9 +59,13 @@ module.exports = function(grunt) {
     }
 
     var absolutePathToResource = path.normalize(path.join(dirOfFile,relativePath));
+
     var md5OfResource = md5(absolutePathToResource);
+
     var fName = format('{0}', path.basename(relativePath));
-    var relativeOutputFn = format('assets/{1}_{0}', fName, md5OfResource);
+
+    var relativeOutputFn = format('assets/{0}_{1}_{2}', md5OfResource, version, fName);
+
     var newPath = path.normalize(path.join(destDir, relativeOutputFn));
 
     file.copy(absolutePathToResource, newPath);
@@ -81,27 +85,17 @@ module.exports = function(grunt) {
     return b.match(DATA_URI_MATCHER) ? false : b.match(RELATIVE_TO_HOST_MATCHER) ? false : !b.match(PROTOCOL_MATCHER);
   }
 
-  //to avoid duplicated file names
-  var folderIdx = 0,
-    idx = 0;
-
-  function rewriteURLS (ctn, src, destDir) {
+  function rewriteURLS (ctn, src, destDir, version) {
 
     if (!lib.isNull(ctn)) {
-      var first = true;
       ctn = ctn.replace(URL_MATCHER, function (a, b) {
-        if (first) {
-          first = false;
-          folderIdx++;
-          idx = 0;
-        }
         b = trim(b);
         var needRewrite = checkIfNeedRewrite(b);
 
         if (needRewrite) {
-          var pathToFile = copyFileToNewLocation(src, destDir, b, folderIdx, idx++);
+          var pathToFile = copyFileToNewLocation(src, destDir, b, version);
 
-          var o = format('url({0})', addNoCache(pathToFile));
+          var o = format('url({0})', pathToFile);
           verbose.writeln(format('===> This url will be transformed : {0} ==> {1}', b, o));
           return o;
         }
@@ -139,7 +133,7 @@ module.exports = function(grunt) {
 
             verbose.writeln('=========================================');
             verbose.writeln('Checking if require to rewrite the paths');
-            css = rewriteURLS(css, src, destDir);
+            css = rewriteURLS(css, src, destDir, options.version);
 
           } catch(e) {
             callback(e);
@@ -174,13 +168,15 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('cLess', 'Concatenate less or css resources.', function() {
 
     var me = this,
-      optFile = me.data,
-      src = optFile.src,
-      dest = optFile.dest,
-      options = me.data.options || {};
+      data = me.data,
+      src = data.src,
+      dest = data.dest,
+      options = me.options({
+        version : lib.now()
+      });
 
-
-
+    // make sure the version does not have spaces in it
+    options.version = lib.trim(options.version + '').replace(/\s+/g,'_');
 
     if (!src) {
       grunt.warn('Missing src property.');
