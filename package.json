@@ -1,7 +1,7 @@
 {
   "name": "grunt-r3m",
   "description": "A tiny set of utilities for grunt",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "homepage": "https://github.com/royriojas/grunt-r3m",
   "author": "royriojas@gmail.com",
   "repository": {
@@ -23,7 +23,6 @@
   },
   "dependencies": {
     "less": "*",
-    "clean-css": "*",
     "request": "*",
     "dot" : "*"
   },
