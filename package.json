@@ -24,7 +24,7 @@
   "dependencies": {
     "less": "~1.5.0",
     "clean-css": "~1.1.7",
-    "request": "~2.27.0"
+    "request": "~2.27.0",
     "dot" : "*"
   },
   "devDependencies": {
